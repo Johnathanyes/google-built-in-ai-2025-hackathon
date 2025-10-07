@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { AuthService } from "../../utils/auth"
-import type { UserData } from '../../utils/schema';
+import { AuthService } from "../utils/auth"
+import type { UserData } from '../utils/db';
 
-export default function App() {
+const Auth = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,9 +71,9 @@ export default function App() {
       <div className="w-80 h-96 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full">
-            {user.profilePicture && (
+            {user.profile_picture && (
               <img
-                src={user.profilePicture}
+                src={user.profile_picture}
                 alt={user.name}
                 className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-blue-100"
               />
@@ -165,3 +165,5 @@ export default function App() {
     </div>
   );
 }
+
+export default Auth;

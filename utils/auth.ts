@@ -1,4 +1,5 @@
-import { db, type UserData } from './db';
+import { db } from './db';
+import { type UserData } from './schema.ts';
 
 interface GoogleUserInfo {
   id: string;
@@ -17,23 +18,18 @@ export class AuthService {
       const token = await new Promise<string>((resolve, reject) => {
         chrome.identity.getAuthToken({ interactive: true }, (result) => {
           if (chrome.runtime.lastError) {
-            console.error('[Auth] getAuthToken interactive error:', chrome.runtime.lastError.message);
             return reject(new Error(chrome.runtime.lastError.message));
           }
           // Chrome Identity API returns the token directly as a string, not as result.token
           if (!result || typeof result !== 'string') {
-            console.error('[Auth] getAuthToken interactive returned empty result:', result);
             return reject(new Error('No token returned'));
           }
-          console.log('[Auth] getAuthToken interactive success: token present');
           resolve(result);
         });
       });
 
       this.token = token;
 
-      console.log('[Auth] fetching userinfo with token');
-      // Fetch user info from Google
       const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -41,28 +37,24 @@ export class AuthService {
       });
 
       if (!response.ok) {
-        console.error('[Auth] userinfo fetch failed:', response.status, response.statusText);
         throw new Error(`Failed to fetch user info: ${response.status}`);
       }
 
       const userInfo: GoogleUserInfo = await response.json();
-      console.log('[Auth] userinfo:', userInfo);
 
       // Save to IndexedDB
       const userData: UserData = {
         id: userInfo.id,
         email: userInfo.email,
         name: userInfo.name,
-        profile_picture: userInfo.profile_picture,
+        profilePicture: userInfo.profile_picture,
       };
 
       await db.saveUser(userData);
-      console.log('[Auth] user saved to IndexedDB');
       return userData;
     } catch (error) {
       // Clear token on error
       this.token = null;
-      console.error('[Auth] signIn failed:', error);
       throw error;
     }
   }
@@ -102,8 +94,6 @@ export class AuthService {
 
   static async getCurrentUser(): Promise<UserData | null> {
     try {
-      console.log('[Auth] getCurrentUser: requesting non-interactive token');
-      // Try to get cached token (non-interactive)
       const token = await new Promise<string | null>((resolve) => {
         chrome.identity.getAuthToken({ interactive: false }, (result) => {
           if (chrome.runtime.lastError || !result || typeof result !== 'string') {
@@ -114,7 +104,6 @@ export class AuthService {
             }
             return resolve(null);
           }
-          console.log('[Auth] getAuthToken non-interactive success: token present');
           resolve(result);
         });
       });
@@ -123,8 +112,6 @@ export class AuthService {
 
       this.token = token;
 
-      console.log('[Auth] fetching userinfo (non-interactive)');
-      // Verify token and get user info
       const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -132,16 +119,12 @@ export class AuthService {
       });
 
       if (!response.ok) {
-        console.warn('[Auth] userinfo (non-interactive) not ok:', response.status, response.statusText);
-        // Token might be expired, clear it
         this.token = null;
         return null;
       }
 
       const userInfo: GoogleUserInfo = await response.json();
-      console.log('[Auth] userinfo (non-interactive):', userInfo);
       
-      // Get from IndexedDB or create new entry
       let userData = await db.getUser(userInfo.id);
       
       if (!userData) {
@@ -149,10 +132,9 @@ export class AuthService {
           id: userInfo.id,
           email: userInfo.email,
           name: userInfo.name,
-          profile_picture: userInfo.profile_picture
+          profilePicture: userInfo.profile_picture
         };
         await db.saveUser(userData);
-        console.log('[Auth] user created in IndexedDB');
       }
 
       return userData;

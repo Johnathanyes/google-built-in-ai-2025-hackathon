@@ -1,13 +1,9 @@
+import { PageContext, UserData,  } from "./schema";
+
 const DB_NAME = "HackathonDB";
 const DB_VERSION = 1;
 const STORE_NAME = "userData";
 
-export interface UserData {
-  id: string;
-  email: string;
-  name: string;
-  profile_picture?: string;
-}
 
 class Database {
   private db: IDBDatabase | null = null;
