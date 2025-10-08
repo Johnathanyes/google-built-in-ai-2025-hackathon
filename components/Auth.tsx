@@ -71,15 +71,15 @@ const Auth = () => {
       <div className="w-80 h-96 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full">
-            {user.profile_picture && (
+            {user.profilePicture && (
               <img
-                src={user.profile_picture}
+                src={user.profilePicture}
                 alt={user.name}
                 className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-blue-100"
               />
             )}
             <h2 className="text-xl font-bold text-gray-800 text-center mb-1">
-              Welcome back!
+              Yo my guy!!
             </h2>
             <p className="text-gray-600 text-center mb-1">{user.name}</p>
             <p className="text-gray-500 text-sm text-center mb-6">{user.email}</p>

@@ -1,5 +1,4 @@
-import { db } from './db';
-import { type UserData } from './schema.ts';
+import { db, type UserData } from './db';
 
 interface GoogleUserInfo {
   id: string;
