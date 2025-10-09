@@ -101,9 +101,6 @@ export interface HighlightedContext {
   conversationId: string;
   highlightedText: string;
   timeCreated: Date;
-  isActive: boolean; // Shown in sidebar, can be toggled
-  order: number; // Display order (user can reorder)
-  label?: string; // User can add a label like "Key quote"
   color?: string; // Visual marker: 'yellow', 'green', 'blue'
   position?: SelectionPosition; // Where on page
   note?: string; // User can add a note about why they highlighted this
@@ -141,25 +138,6 @@ export interface MultimodalAttachment {
 }
 
 // ============================================
-// UI STATE (Optional - could use chrome.storage.local instead)
-// ============================================
-// Track UI state per conversation
-export interface ConversationUIState {
-  id: string; // Same as conversationId
-  conversationId: string;
-  lastUpdated: Date;
-  // Context visibility in UI
-  showPageContext: boolean;
-  showHighlights: boolean;
-  showAttachments: boolean;
-  // Expanded sections
-  expandedContextIds: string[];
-  // Active selections for next message
-  activeHighlightIds: string[]; // Which highlights to include in next message
-  activeAttachmentIds: string[]; // Which attachments to include in next message
-}
-
-// ============================================
 // UTILITY TYPES
 // ============================================
 
@@ -169,7 +147,6 @@ export interface ConversationWithContext extends Conversations {
   highlightedContexts: HighlightedContext[]; // All user highlights
   multimodalAttachments: MultimodalAttachment[]; // All attachments
   messages: MessageStore[];
-  uiState?: ConversationUIState;
 }
 
 // For building the prompt to send to API

@@ -1,11 +1,21 @@
 // Conversation repository - handles conversation operations
 import type { DBOperations } from '../db';
 import type { Conversations } from '../schema';
+import type { MessageRepository } from './messageRepository';
+import type { highlightedContextRepository } from './highlightRepository';
+import type { PageContextRepository } from './pageContextRepository';
+import type { AttachmentRepository } from './attachmentRepository';
 
 const STORE_NAME = 'conversations';
 
 export class ConversationRepository {
-  constructor(private readonly ops: DBOperations) {}
+  constructor(
+    private readonly ops: DBOperations,
+    private readonly messageRepo?: MessageRepository,
+    private readonly highlightRepo?: highlightedContextRepository,
+    private readonly pageContextRepo?: PageContextRepository,
+    private readonly attachmentRepo?: AttachmentRepository,
+  ) {}
 
   async save(conversation: Conversations): Promise<void> {
     await this.ops.put(STORE_NAME, conversation);
@@ -28,6 +38,20 @@ export class ConversationRepository {
   }
 
   async delete(id: string): Promise<void> {
+    // Cascade delete all related data
+    // Delete in parallel for better performance
+    await Promise.all([
+      // Delete all messages
+      this.messageRepo?.deleteByConversation(id),
+      // Delete all highlights
+      this.highlightRepo?.deleteByConversation(id),
+      // Delete all page contexts
+      this.pageContextRepo?.deleteByConversation(id),
+      // Delete all attachments
+      this.attachmentRepo?.deleteByConversation(id),
+    ]);
+
+    // Finally delete the conversation itself
     await this.ops.delete(STORE_NAME, id);
   }
 

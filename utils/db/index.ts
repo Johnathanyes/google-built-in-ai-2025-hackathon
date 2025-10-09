@@ -4,6 +4,9 @@ import { allSchemas } from './schemas';
 import { UserRepository } from './repositories/userRepository';
 import { ConversationRepository } from './repositories/conversationRepository';
 import { MessageRepository } from './repositories/messageRepository';
+import { highlightedContextRepository } from './repositories/highlightRepository';
+import { PageContextRepository } from './repositories/pageContextRepository';
+import { AttachmentRepository } from './repositories/attachmentRepository';
 
 // Create singleton database instance
 const database = new Database('AppDB', allSchemas);
@@ -20,8 +23,19 @@ const ensureInit = async () => {
 
 // Repository instances
 export const userRepo = new UserRepository(dbOps);
-export const conversationRepo = new ConversationRepository(dbOps);
 export const messageRepo = new MessageRepository(dbOps);
+export const highlightRepo = new highlightedContextRepository(dbOps);
+export const pageContextRepo = new PageContextRepository(dbOps);
+export const attachmentRepo = new AttachmentRepository(dbOps);
+
+// Conversation repository needs other repos for cascade delete
+export const conversationRepo = new ConversationRepository(
+  dbOps,
+  messageRepo,
+  highlightRepo,
+  pageContextRepo,
+  attachmentRepo
+);
 
 // Simple API for common operations (backwards compatible with old db.ts)
 export const db = {
@@ -53,6 +67,9 @@ export const db = {
   users: userRepo,
   conversations: conversationRepo,
   messages: messageRepo,
+  highlights: highlightRepo,
+  pageContext: pageContextRepo,
+  attachments: attachmentRepo
 };
 
 // Export types
