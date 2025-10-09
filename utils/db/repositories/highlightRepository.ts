@@ -14,6 +14,14 @@ export class highlightedContextRepository {
         return this.ops.get<HighlightedContext>(STORE_NAME, id);
     }
 
+    async getAll(): Promise<HighlightedContext[]> {
+        const highlights = await this.ops.getAll<HighlightedContext>(STORE_NAME);
+        // Sort by time created descending (newest first)
+        return highlights.sort((a, b) => 
+            new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
+        );
+    }
+
     async getByConversation(conversationId: string): Promise<HighlightedContext[]> {
         return this.ops.getAllByIndex<HighlightedContext>(
             STORE_NAME,

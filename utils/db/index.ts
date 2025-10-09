@@ -1,4 +1,3 @@
-// Main database entrypoint - exports singleton instance and repositories
 import { Database, DBOperations } from './db';
 import { allSchemas } from './schemas';
 import { UserRepository } from './repositories/userRepository';
